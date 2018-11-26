@@ -1,0 +1,225 @@
+<template>
+  <div class="container column">
+    <div class="film-detail" if="!!movie.images">
+      <div class="film-image">
+        <image src="{{movie.images.large}}"></image>
+      </div>
+      <div class="film-info column">
+        <div class="info-container">
+          <div class="column">
+            <text class="film-title">{{movie.title}}</text>
+            <text class="film-year">{{movie.year}}</text>
+          </div>
+          <div class="film-rating column">
+            <block>
+              <text class="label">评分</text>
+              <text if="movie.rating.average !== 0" class="rating">{{movie.rating.average}}</text>
+              <text else class="rating">暂无</text>
+            </block>
+          </div>
+        </div>
+        <div class="directors">
+          <text class="label">导演：</text>
+          <text class="detail-wrap">
+            <block for="director in movie.directors">
+              <span class="person">{{director.name + ' '}} </span>
+            </block>
+          </text>
+        </div>
+        <div class="casts">
+          <text class="label">主演：</text>
+          <text class="detail-wrap">
+            <block for="actor in movie.casts">
+              <span class="person">{{actor.name + ' '}} </span>
+            </block>
+          </text>
+        </div>
+        <div class="genres">
+          <text class="label">类型：</text>
+          <block for="{{type in movie.genres}}">
+            <text class="person">{{type + ' '}}</text>
+          </block>
+        </div>
+        <div class="genres">
+          <text class="label">国家/地区：</text>
+          <block for="{{region in movie.countries}}">
+            <text class="person">{{region + ' '}}</text>
+          </block>
+        </div>
+        <div class="collect-wish">
+          <text>看过（{{movie.reviews_count}}）</text>
+          <text>想看（{{movie.wish_count}}）</text>
+        </div>
+      </div>
+    </div>
+    <div class="summary column">
+      <text class="title">剧情简介</text>
+      <text class="content">{{movie.summary}}</text>
+    </div>
+    <div class="content-wrap column">
+      <text class="title">演职人员</text>
+      <list class="casts-list">
+        <list-item class="column cast" type="director" for="director in movie.directors">
+          <image if="!!director.avatars" src="{{director.avatars.large}}"></image>
+          <image else
+                 src="https://img3.doubanio.com/f/movie/8dd0c794499fe925ae2ae89ee30cd225750457b4/pics/movie/celebrity-default-medium.png"></image>
+          <text>{{director.name}}</text>
+        </list-item>
+        <list-item class="column cast" type="actor" for="actor in movie.casts">
+          <image if="!!actor.avatars" src="{{actor.avatars.large}}"></image>
+          <image else
+                 src="https://img3.doubanio.com/f/movie/8dd0c794499fe925ae2ae89ee30cd225750457b4/pics/movie/celebrity-default-medium.png"></image>
+          <text>{{actor.name}}</text>
+        </list-item>
+      </list>
+    </div>
+  </div>
+</template>
+
+<style>
+  .column {
+    flex-direction: column;
+  }
+
+  .container {
+    padding: 20px;
+  }
+
+  .film-image {
+    padding-right: 20px;
+    width: 300px;
+    flex-shrink: 0;
+  }
+
+  .film-image image {
+    height: 400px;
+    width: 300px;
+  }
+
+  .info-container {
+    justify-content: space-between;
+    margin-bottom: 50px;
+  }
+
+  .film-info {
+    width: 100%;
+  }
+
+  .film-title {
+    font-size: 40px;
+    lines: 2;
+  }
+
+  .film-year {
+    color: #999999;
+  }
+
+  .film-rating {
+    height: 100px;
+    width: 100px;
+    border-radius: 20px;
+    background-color: #f0f3f5;
+    justify-content: center;
+    align-content: center;
+    flex-shrink: 0;
+  }
+
+  .label {
+    text-align: center;
+    color: #888888;
+    font-size: 26px;
+  }
+
+  .rating {
+    text-align: center;
+    color: #ff680d;
+    font-size: 40px;
+  }
+
+  .detail-wrap {
+    /*flex-wrap: wrap;*/
+  }
+
+  .directors, .casts {
+    align-items: flex-start;
+  }
+
+  .directors .label, .casts .label {
+    flex-shrink: 0;
+    width: 80px;
+    text-align: left;
+  }
+
+  .person {
+    font-size: 26px;
+  }
+
+  .collect-wish text {
+    font-size: 26px;
+  }
+
+  .title {
+    height: 60px;
+    border-left-width: 10px;
+    border-left-color: #00B51D;
+    background: linear-gradient(to right, #f0f3f5, #ffffff);
+    margin: 30px 0;
+    padding-left: 20px;
+  }
+
+  .content {
+    line-height: 50px;
+  }
+
+  .casts-list {
+    flex-direction: row;
+    height: 300px;
+    width: 100%;
+  }
+
+  .cast {
+    width: 200px;
+    height: 100%;
+    margin: 0 20px 10px 0;
+  }
+
+  .cast image {
+    width: 200px;
+  }
+
+  .cast text {
+    text-align: center;
+    lines: 1;
+  }
+</style>
+
+<script>
+    import fetch from "@system.fetch";
+
+    export default {
+        protected: {
+            id: 0,
+            movie: {}
+        },
+        onInit: function () {
+            this.getMovieById();
+        },
+        getMovieById: function () {
+            const that = this; // 保存当前this
+            fetch.fetch({
+                url: 'https://api.douban.com/v2/movie/subject/' + that.id,
+                success: function (response) {
+                    console.log(response);
+                    let data = JSON.parse(response.data);
+                    if (response.code === 200) {
+                        that.movie = data;
+                        that.$page.setTitleBar({text: data.title});
+                    }
+                },
+                fail: function (err, code) {
+                    console.log(`handling fail, code = ${code}`);
+                }
+            })
+        }
+    }
+</script>

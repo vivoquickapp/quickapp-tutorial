@@ -1,0 +1,255 @@
+<template>
+  <list onscrollbottom="scrollBottomHandler()" class="movie-list">
+    <block for="movie in movies">
+      <list-item type="movie" onclick="gotoDetail(movie.id)">
+        <div class="movie">
+          <div class="number" show="{{index}}">
+            <text>{{$idx + 1}}</text>
+          </div>
+          <div class="poster">
+            <image src="{{movie.images.large}}"></image>
+          </div>
+          <div class="info">
+            <div class="top">
+              <div class="title">
+                <text class="name">{{movie.title}}</text>
+                <text class="year">{{movie.year}}</text>
+              </div>
+              <div class="rating">
+                <text class="average" show="{{movie.rating.average !== 0}}">{{movie.rating.average}}</text>
+                <text class="average" show="{{movie.rating.average === 0}}">暂无评分</text>
+              </div>
+            </div>
+            <div class="bottom">
+              <div class="wrap">
+                <text class="tag">类型：</text>
+                <text>
+                  <block for="type in movie.genres">
+                    <span>{{type + ' '}}</span>
+                  </block>
+                </text>
+              </div>
+              <div class="wrap">
+                <text class="tag">演员：</text>
+                <text>
+                  <block for="actor in movie.casts">
+                    <span>{{actor.name + ' '}}</span>
+                  </block>
+                </text>
+              </div>
+              <div class="wrap">
+                <text class="tag">导演：</text>
+                <text>
+                  <block for="director in movie.directors">
+                    <span>{{director.name + ' '}}</span>
+                  </block>
+                </text>
+              </div>
+            </div>
+          </div>
+        </div>
+      </list-item>
+    </block>
+    <list-item class="skeleton" type="skeleton" if="!more">
+      <div class="skeleton-movie">
+        <div class="skeleton-poster bg-grey"></div>
+        <div class="skeleton-info">
+          <div class="skeleton-top">
+            <div class="column">
+              <div class="skeleton-title bg-grey"></div>
+              <div class="skeleton-year bg-grey"></div>
+            </div>
+            <div class="skeleton-rating bg-grey"></div>
+          </div>
+          <div class="skeleton-bottom">
+            <div class="skeleton-wrap bg-grey"></div>
+            <div class="skeleton-wrap bg-grey"></div>
+            <div class="skeleton-wrap bg-grey"></div>
+          </div>
+        </div>
+      </div>
+    </list-item>
+    <list-item class="more" type="more">
+      <div if="!more">
+        <progress type="circular"></progress>
+      </div>
+      <div if="more">
+        <text>没有更多了~</text>
+      </div>
+    </list-item>
+  </list>
+</template>
+
+<style>
+  .column {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .movie {
+    height: 300px;
+    margin: 20px 20px 0 20px;
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .info {
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    padding: 0 20px;
+  }
+
+  .top {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+
+  .bottom {
+    flex-direction: column;
+  }
+
+  .bottom text {
+    font-size: 26px;
+  }
+
+  .tag {
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .wrap {
+    justify-content: flex-start;
+  }
+
+  .name {
+    font-size: 36px;
+  }
+
+  .title {
+    flex-direction: column;
+  }
+
+  .poster {
+    width: 230px;
+  }
+
+  .poster image {
+    width: 100%;
+    height: 100%;
+  }
+
+  .rating {
+    height: 100px;
+    width: 100px;
+    border-radius: 20px;
+    background-color: #f0f3f5;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .average {
+    color: #27a;
+    font-size: 36px;
+    text-align: center;
+  }
+
+  .wrap {
+    justify-content: flex-start;
+  }
+
+  .more {
+    justify-content: center;
+  }
+
+  .number {
+    width: 80px;
+    justify-content: center;
+  }
+
+  .number text {
+    font-size: 26px;
+  }
+
+  .skeleton-movie {
+    height: 300px;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .bg-grey {
+    background-color: #dedede;
+  }
+
+  .skeleton-poster {
+    width: 200px;
+    height: 260px;
+    flex-shrink: 0;
+  }
+
+  .skeleton-info {
+    height: 260px;
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .skeleton-top {
+    height: 100px;
+    width: 100%;
+  }
+
+  .skeleton-title {
+    height: 60px;
+    width: 100%;
+    margin-left: 20px;
+  }
+
+  .skeleton-year {
+    height: 30px;
+    width: 200px;
+    margin-top: 10px;
+    margin-left: 20px;
+  }
+
+  .skeleton-rating {
+    height: 100px;
+    width: 100px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    margin-left: 20px;
+  }
+
+  .skeleton-bottom {
+    height: 160px;
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .skeleton-wrap {
+    height: 60px;
+    width: 100%;
+    margin: 20px 20px 0 20px;
+  }
+</style>
+
+<script>
+    import router from "@system.router";
+
+    export default {
+        props: ['movies', 'more', 'index'],
+        scrollBottomHandler() {
+            this.$emit('scrollbottom');
+        },
+        gotoDetail: function (id) {
+            router.push({
+                uri: '/page/detail',
+                params: {
+                    id: id
+                }
+            })
+        }
+    }
+</script>

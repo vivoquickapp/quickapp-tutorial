@@ -1,0 +1,51 @@
+<import name="tabbar" src="../../common/component/tabbar"></import>
+<import name="movie-list" src="../../common/component/movieList"></import>
+
+<template>
+  <div class="container">
+    <movie-list movies="{{movies}}" index="true" onscrollbottom="getMovieList()" more="{{more}}"></movie-list>
+    <tabbar status="top"></tabbar>
+  </div>
+</template>
+
+<style>
+  .container {
+    display: flex;
+    padding-bottom: 100px;
+  }
+</style>
+
+<script>
+    import fetch from "@system.fetch";
+
+    export default {
+        protected: {
+            movies: [],
+            start: 0,
+            count: 10,
+            more: false,
+        },
+        onInit: function () {
+            this.getMovieList();
+        },
+        getMovieList: function () {
+            const that = this; // 保存当前this
+            fetch.fetch({
+                url: 'https://api.douban.com/v2/movie/top250?count=' + that.count + '&start=' + that.start,
+                success: function (response) {
+                    let data = JSON.parse(response.data); // 解析请求回来的数据为对象
+                    if (response.code === 200) { // 判断当前请求是否成功返回
+                        that.movies = that.movies.concat(data.subjects); // 把请求到的数据赋值到定义的变量上去
+                        that.start += that.count; // 每次请求成功后给start增加页码
+                    }
+                    if (that.movies.length === data.total) {
+                        that.more = true;
+                    }
+                },
+                fail: function (err, code) {
+                    console.log(`handling fail, code = ${code}`);
+                }
+            })
+        }
+    }
+</script>

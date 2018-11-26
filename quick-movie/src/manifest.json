@@ -1,0 +1,55 @@
+{
+  "package": "com.quick.movie",
+  "name": "快电影PRO",
+  "versionName": "1.0.0",
+  "versionCode": "1",
+  "minPlatformVersion": "101",
+  "icon": "/common/picture/logo.png",
+  "features": [
+    { "name": "system.prompt" },
+    { "name": "system.fetch" },
+    { "name": "system.router" },
+    { "name": "system.geolocation" },
+    { "name": "system.storage" },
+    { "name": "system.shortcut" }
+  ],
+  "permissions": [
+    { "origin": "*" }
+  ],
+  "config": {
+    "logLevel": "debug"
+  },
+  "router": {
+    "entry": "page/index",
+    "pages": {
+      "page/index": {
+        "component": "index"
+      },
+      "page/top": {
+        "component": "index"
+      },
+      "page/detail": {
+        "component": "index"
+      }
+    }
+  },
+  "display": {
+    "titleBarBackgroundColor": "#00B51D",
+    "titleBarTextColor": "#ffffff",
+    "menu": true,
+    "pages": {
+      "page/index": {
+        "titleBarText": "首页",
+        "menu": true
+      },
+      "page/top": {
+        "titleBarText": "排行榜",
+        "menu": true
+      },
+      "page/detail": {
+        "titleBarText": "详情页",
+        "menu": true
+      }
+    }
+  }
+}

@@ -1,0 +1,100 @@
+<import name="tabbar" src="../../common/component/tabbar"></import>
+<import name="movie-list" src="../../common/component/movieList"></import>
+<template>
+  <div class="container">
+    <div class="filter-wrap">
+      <text class="filter {{type === 'in_theaters'? 'active': ''}}" onclick="getMovieListByType('in_theaters')">正在热映
+      </text>
+      <text class="filter {{type === 'coming_soon'? 'active': ''}}" onclick="getMovieListByType('coming_soon')">即将上映
+      </text>
+    </div>
+    <movie-list movies="{{movies}}" index="false" onscrollbottom="getMovieList()" more="{{more}}"></movie-list>
+    <tabbar status="index"></tabbar>
+  </div>
+</template>
+
+<style>
+  .container {
+    display: flex;
+    padding: 100px 0;
+  }
+
+  .filter-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100px;
+    width: 100%;
+    background-color: #00B51D;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .filter {
+    text-align: center;
+    color: #ffffff;
+    width: 200px;
+    height: 50px;
+    border: 1px solid #ffffff;
+    font-size: 24px;
+  }
+
+  .active {
+    background-color: #ffffff;
+    color: #00B51D;
+  }
+</style>
+
+<script>
+    import fetch from "@system.fetch";
+    import prompt from "@system.prompt";
+    import {getCityName} from "../../common/script/get-city-name";
+
+    export default {
+        protected: {
+            movies: [],
+            start: 0,
+            count: 10,
+            more: false,
+            type: 'in_theaters'
+        },
+        onInit: function () {
+            getCityName().then((city) => {
+                this.getMovieList(city);
+                this.$page.setTitleBar({text: '首页-' + city})
+            });
+        },
+        getMovieList: function (city) {
+            const that = this; // 保存当前this
+            fetch.fetch({
+                url: 'https://api.douban.com/v2/movie/' + that.type + '?count=' + that.count + '&start=' + that.start + '&city=' + city,
+                success: function (response) {
+                    let data = JSON.parse(response.data); // 解析请求回来的数据为对象
+                    if (response.code === 200) { // 判断当前请求是否成功返回
+                        that.movies = that.movies.concat(data.subjects); // 把请求到的数据赋值到定义的变量上去
+                        that.start += that.count; // 每次请求成功后给start增加页码
+                    } else {
+                        prompt.showToast({
+                            message: '请求出错！错误码：' + response.code
+                        })
+                    }
+                    if (that.movies.length === data.total) {
+                        that.more = true;
+                    }
+                },
+                fail: function (err, code) {
+                    prompt.showToast({
+                        message: '请求出错！错误码：' + code
+                    })
+                }
+            })
+        },
+        getMovieListByType: function (type) {
+            this.start = 0;
+            this.movies = [];
+            this.more = false;
+            this.type = type;
+            this.getMovieList();
+        }
+    }
+</script>
